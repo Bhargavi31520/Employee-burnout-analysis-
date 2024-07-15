@@ -1,0 +1,625 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "provenance": []
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "wMg12fRnKOLY"
+      },
+      "outputs": [],
+      "source": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "import pandas as pd\n",
+        "from sklearn.model_selection import train_test_split\n",
+        "from sklearn.preprocessing import StandardScaler\n",
+        "from sklearn.linear_model import LinearRegression\n",
+        "from sklearn.metrics import mean_squared_error , mean_absolute_error , r2_score"
+      ],
+      "metadata": {
+        "id": "TFN8sYvQKYuc"
+      },
+      "execution_count": 1,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "data=pd.read_excel(\"employee_burnout_analysis-AI.xlsx\")"
+      ],
+      "metadata": {
+        "id": "GdAdj3JTKjSF"
+      },
+      "execution_count": 2,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "data=data.dropna()"
+      ],
+      "metadata": {
+        "id": "eDVu5-bQKrhK"
+      },
+      "execution_count": 3,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "data.head()"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 348
+        },
+        "id": "09u4UzDyKz7w",
+        "outputId": "c74ce5eb-b6b8-4db2-a6ed-5085b1efc12b"
+      },
+      "execution_count": 7,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "                Employee ID Date of Joining  Gender Company Type  \\\n",
+              "0  fffe32003000360033003200      2008-09-30  Female      Service   \n",
+              "1      fffe3700360033003500      2008-11-30    Male      Service   \n",
+              "3  fffe32003400380032003900      2008-11-03    Male      Service   \n",
+              "4  fffe31003900340031003600      2008-07-24  Female      Service   \n",
+              "5      fffe3300350037003500      2008-11-26    Male      Product   \n",
+              "\n",
+              "  WFH Setup Available  Designation  Resource Allocation  Mental Fatigue Score  \\\n",
+              "0                  No            2                  3.0                   3.8   \n",
+              "1                 Yes            1                  2.0                   5.0   \n",
+              "3                 Yes            1                  1.0                   2.6   \n",
+              "4                  No            3                  7.0                   6.9   \n",
+              "5                 Yes            2                  4.0                   3.6   \n",
+              "\n",
+              "   Burn Rate  \n",
+              "0       0.16  \n",
+              "1       0.36  \n",
+              "3       0.20  \n",
+              "4       0.52  \n",
+              "5       0.29  "
+            ],
+            "text/html": [
+              "\n",
+              "  <div id=\"df-8ae08d69-fd94-4148-ba98-1096132a7f18\" class=\"colab-df-container\">\n",
+              "    <div>\n",
+              "<style scoped>\n",
+              "    .dataframe tbody tr th:only-of-type {\n",
+              "        vertical-align: middle;\n",
+              "    }\n",
+              "\n",
+              "    .dataframe tbody tr th {\n",
+              "        vertical-align: top;\n",
+              "    }\n",
+              "\n",
+              "    .dataframe thead th {\n",
+              "        text-align: right;\n",
+              "    }\n",
+              "</style>\n",
+              "<table border=\"1\" class=\"dataframe\">\n",
+              "  <thead>\n",
+              "    <tr style=\"text-align: right;\">\n",
+              "      <th></th>\n",
+              "      <th>Employee ID</th>\n",
+              "      <th>Date of Joining</th>\n",
+              "      <th>Gender</th>\n",
+              "      <th>Company Type</th>\n",
+              "      <th>WFH Setup Available</th>\n",
+              "      <th>Designation</th>\n",
+              "      <th>Resource Allocation</th>\n",
+              "      <th>Mental Fatigue Score</th>\n",
+              "      <th>Burn Rate</th>\n",
+              "    </tr>\n",
+              "  </thead>\n",
+              "  <tbody>\n",
+              "    <tr>\n",
+              "      <th>0</th>\n",
+              "      <td>fffe32003000360033003200</td>\n",
+              "      <td>2008-09-30</td>\n",
+              "      <td>Female</td>\n",
+              "      <td>Service</td>\n",
+              "      <td>No</td>\n",
+              "      <td>2</td>\n",
+              "      <td>3.0</td>\n",
+              "      <td>3.8</td>\n",
+              "      <td>0.16</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>1</th>\n",
+              "      <td>fffe3700360033003500</td>\n",
+              "      <td>2008-11-30</td>\n",
+              "      <td>Male</td>\n",
+              "      <td>Service</td>\n",
+              "      <td>Yes</td>\n",
+              "      <td>1</td>\n",
+              "      <td>2.0</td>\n",
+              "      <td>5.0</td>\n",
+              "      <td>0.36</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>3</th>\n",
+              "      <td>fffe32003400380032003900</td>\n",
+              "      <td>2008-11-03</td>\n",
+              "      <td>Male</td>\n",
+              "      <td>Service</td>\n",
+              "      <td>Yes</td>\n",
+              "      <td>1</td>\n",
+              "      <td>1.0</td>\n",
+              "      <td>2.6</td>\n",
+              "      <td>0.20</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>4</th>\n",
+              "      <td>fffe31003900340031003600</td>\n",
+              "      <td>2008-07-24</td>\n",
+              "      <td>Female</td>\n",
+              "      <td>Service</td>\n",
+              "      <td>No</td>\n",
+              "      <td>3</td>\n",
+              "      <td>7.0</td>\n",
+              "      <td>6.9</td>\n",
+              "      <td>0.52</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>5</th>\n",
+              "      <td>fffe3300350037003500</td>\n",
+              "      <td>2008-11-26</td>\n",
+              "      <td>Male</td>\n",
+              "      <td>Product</td>\n",
+              "      <td>Yes</td>\n",
+              "      <td>2</td>\n",
+              "      <td>4.0</td>\n",
+              "      <td>3.6</td>\n",
+              "      <td>0.29</td>\n",
+              "    </tr>\n",
+              "  </tbody>\n",
+              "</table>\n",
+              "</div>\n",
+              "    <div class=\"colab-df-buttons\">\n",
+              "\n",
+              "  <div class=\"colab-df-container\">\n",
+              "    <button class=\"colab-df-convert\" onclick=\"convertToInteractive('df-8ae08d69-fd94-4148-ba98-1096132a7f18')\"\n",
+              "            title=\"Convert this dataframe to an interactive table.\"\n",
+              "            style=\"display:none;\">\n",
+              "\n",
+              "  <svg xmlns=\"http://www.w3.org/2000/svg\" height=\"24px\" viewBox=\"0 -960 960 960\">\n",
+              "    <path d=\"M120-120v-720h720v720H120Zm60-500h600v-160H180v160Zm220 220h160v-160H400v160Zm0 220h160v-160H400v160ZM180-400h160v-160H180v160Zm440 0h160v-160H620v160ZM180-180h160v-160H180v160Zm440 0h160v-160H620v160Z\"/>\n",
+              "  </svg>\n",
+              "    </button>\n",
+              "\n",
+              "  <style>\n",
+              "    .colab-df-container {\n",
+              "      display:flex;\n",
+              "      gap: 12px;\n",
+              "    }\n",
+              "\n",
+              "    .colab-df-convert {\n",
+              "      background-color: #E8F0FE;\n",
+              "      border: none;\n",
+              "      border-radius: 50%;\n",
+              "      cursor: pointer;\n",
+              "      display: none;\n",
+              "      fill: #1967D2;\n",
+              "      height: 32px;\n",
+              "      padding: 0 0 0 0;\n",
+              "      width: 32px;\n",
+              "    }\n",
+              "\n",
+              "    .colab-df-convert:hover {\n",
+              "      background-color: #E2EBFA;\n",
+              "      box-shadow: 0px 1px 2px rgba(60, 64, 67, 0.3), 0px 1px 3px 1px rgba(60, 64, 67, 0.15);\n",
+              "      fill: #174EA6;\n",
+              "    }\n",
+              "\n",
+              "    .colab-df-buttons div {\n",
+              "      margin-bottom: 4px;\n",
+              "    }\n",
+              "\n",
+              "    [theme=dark] .colab-df-convert {\n",
+              "      background-color: #3B4455;\n",
+              "      fill: #D2E3FC;\n",
+              "    }\n",
+              "\n",
+              "    [theme=dark] .colab-df-convert:hover {\n",
+              "      background-color: #434B5C;\n",
+              "      box-shadow: 0px 1px 3px 1px rgba(0, 0, 0, 0.15);\n",
+              "      filter: drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.3));\n",
+              "      fill: #FFFFFF;\n",
+              "    }\n",
+              "  </style>\n",
+              "\n",
+              "    <script>\n",
+              "      const buttonEl =\n",
+              "        document.querySelector('#df-8ae08d69-fd94-4148-ba98-1096132a7f18 button.colab-df-convert');\n",
+              "      buttonEl.style.display =\n",
+              "        google.colab.kernel.accessAllowed ? 'block' : 'none';\n",
+              "\n",
+              "      async function convertToInteractive(key) {\n",
+              "        const element = document.querySelector('#df-8ae08d69-fd94-4148-ba98-1096132a7f18');\n",
+              "        const dataTable =\n",
+              "          await google.colab.kernel.invokeFunction('convertToInteractive',\n",
+              "                                                    [key], {});\n",
+              "        if (!dataTable) return;\n",
+              "\n",
+              "        const docLinkHtml = 'Like what you see? Visit the ' +\n",
+              "          '<a target=\"_blank\" href=https://colab.research.google.com/notebooks/data_table.ipynb>data table notebook</a>'\n",
+              "          + ' to learn more about interactive tables.';\n",
+              "        element.innerHTML = '';\n",
+              "        dataTable['output_type'] = 'display_data';\n",
+              "        await google.colab.output.renderOutput(dataTable, element);\n",
+              "        const docLink = document.createElement('div');\n",
+              "        docLink.innerHTML = docLinkHtml;\n",
+              "        element.appendChild(docLink);\n",
+              "      }\n",
+              "    </script>\n",
+              "  </div>\n",
+              "\n",
+              "\n",
+              "<div id=\"df-d8c3a0f8-d786-4b91-94c3-595d35749b8a\">\n",
+              "  <button class=\"colab-df-quickchart\" onclick=\"quickchart('df-d8c3a0f8-d786-4b91-94c3-595d35749b8a')\"\n",
+              "            title=\"Suggest charts\"\n",
+              "            style=\"display:none;\">\n",
+              "\n",
+              "<svg xmlns=\"http://www.w3.org/2000/svg\" height=\"24px\"viewBox=\"0 0 24 24\"\n",
+              "     width=\"24px\">\n",
+              "    <g>\n",
+              "        <path d=\"M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z\"/>\n",
+              "    </g>\n",
+              "</svg>\n",
+              "  </button>\n",
+              "\n",
+              "<style>\n",
+              "  .colab-df-quickchart {\n",
+              "      --bg-color: #E8F0FE;\n",
+              "      --fill-color: #1967D2;\n",
+              "      --hover-bg-color: #E2EBFA;\n",
+              "      --hover-fill-color: #174EA6;\n",
+              "      --disabled-fill-color: #AAA;\n",
+              "      --disabled-bg-color: #DDD;\n",
+              "  }\n",
+              "\n",
+              "  [theme=dark] .colab-df-quickchart {\n",
+              "      --bg-color: #3B4455;\n",
+              "      --fill-color: #D2E3FC;\n",
+              "      --hover-bg-color: #434B5C;\n",
+              "      --hover-fill-color: #FFFFFF;\n",
+              "      --disabled-bg-color: #3B4455;\n",
+              "      --disabled-fill-color: #666;\n",
+              "  }\n",
+              "\n",
+              "  .colab-df-quickchart {\n",
+              "    background-color: var(--bg-color);\n",
+              "    border: none;\n",
+              "    border-radius: 50%;\n",
+              "    cursor: pointer;\n",
+              "    display: none;\n",
+              "    fill: var(--fill-color);\n",
+              "    height: 32px;\n",
+              "    padding: 0;\n",
+              "    width: 32px;\n",
+              "  }\n",
+              "\n",
+              "  .colab-df-quickchart:hover {\n",
+              "    background-color: var(--hover-bg-color);\n",
+              "    box-shadow: 0 1px 2px rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);\n",
+              "    fill: var(--button-hover-fill-color);\n",
+              "  }\n",
+              "\n",
+              "  .colab-df-quickchart-complete:disabled,\n",
+              "  .colab-df-quickchart-complete:disabled:hover {\n",
+              "    background-color: var(--disabled-bg-color);\n",
+              "    fill: var(--disabled-fill-color);\n",
+              "    box-shadow: none;\n",
+              "  }\n",
+              "\n",
+              "  .colab-df-spinner {\n",
+              "    border: 2px solid var(--fill-color);\n",
+              "    border-color: transparent;\n",
+              "    border-bottom-color: var(--fill-color);\n",
+              "    animation:\n",
+              "      spin 1s steps(1) infinite;\n",
+              "  }\n",
+              "\n",
+              "  @keyframes spin {\n",
+              "    0% {\n",
+              "      border-color: transparent;\n",
+              "      border-bottom-color: var(--fill-color);\n",
+              "      border-left-color: var(--fill-color);\n",
+              "    }\n",
+              "    20% {\n",
+              "      border-color: transparent;\n",
+              "      border-left-color: var(--fill-color);\n",
+              "      border-top-color: var(--fill-color);\n",
+              "    }\n",
+              "    30% {\n",
+              "      border-color: transparent;\n",
+              "      border-left-color: var(--fill-color);\n",
+              "      border-top-color: var(--fill-color);\n",
+              "      border-right-color: var(--fill-color);\n",
+              "    }\n",
+              "    40% {\n",
+              "      border-color: transparent;\n",
+              "      border-right-color: var(--fill-color);\n",
+              "      border-top-color: var(--fill-color);\n",
+              "    }\n",
+              "    60% {\n",
+              "      border-color: transparent;\n",
+              "      border-right-color: var(--fill-color);\n",
+              "    }\n",
+              "    80% {\n",
+              "      border-color: transparent;\n",
+              "      border-right-color: var(--fill-color);\n",
+              "      border-bottom-color: var(--fill-color);\n",
+              "    }\n",
+              "    90% {\n",
+              "      border-color: transparent;\n",
+              "      border-bottom-color: var(--fill-color);\n",
+              "    }\n",
+              "  }\n",
+              "</style>\n",
+              "\n",
+              "  <script>\n",
+              "    async function quickchart(key) {\n",
+              "      const quickchartButtonEl =\n",
+              "        document.querySelector('#' + key + ' button');\n",
+              "      quickchartButtonEl.disabled = true;  // To prevent multiple clicks.\n",
+              "      quickchartButtonEl.classList.add('colab-df-spinner');\n",
+              "      try {\n",
+              "        const charts = await google.colab.kernel.invokeFunction(\n",
+              "            'suggestCharts', [key], {});\n",
+              "      } catch (error) {\n",
+              "        console.error('Error during call to suggestCharts:', error);\n",
+              "      }\n",
+              "      quickchartButtonEl.classList.remove('colab-df-spinner');\n",
+              "      quickchartButtonEl.classList.add('colab-df-quickchart-complete');\n",
+              "    }\n",
+              "    (() => {\n",
+              "      let quickchartButtonEl =\n",
+              "        document.querySelector('#df-d8c3a0f8-d786-4b91-94c3-595d35749b8a button');\n",
+              "      quickchartButtonEl.style.display =\n",
+              "        google.colab.kernel.accessAllowed ? 'block' : 'none';\n",
+              "    })();\n",
+              "  </script>\n",
+              "</div>\n",
+              "\n",
+              "    </div>\n",
+              "  </div>\n"
+            ],
+            "application/vnd.google.colaboratory.intrinsic+json": {
+              "type": "dataframe",
+              "variable_name": "data",
+              "summary": "{\n  \"name\": \"data\",\n  \"rows\": 18590,\n  \"fields\": [\n    {\n      \"column\": \"Employee ID\",\n      \"properties\": {\n        \"dtype\": \"string\",\n        \"num_unique_values\": 18590,\n        \"samples\": [\n          \"fffe3200330034003400\",\n          \"fffe32003600390036003800\",\n          \"fffe32003600390034003300\"\n        ],\n        \"semantic_type\": \"\",\n        \"description\": \"\"\n      }\n    },\n    {\n      \"column\": \"Date of Joining\",\n      \"properties\": {\n        \"dtype\": \"date\",\n        \"min\": \"2008-01-01 00:00:00\",\n        \"max\": \"2008-12-31 00:00:00\",\n        \"num_unique_values\": 366,\n        \"samples\": [\n          \"2008-04-30 00:00:00\",\n          \"2008-08-28 00:00:00\",\n          \"2008-01-15 00:00:00\"\n        ],\n        \"semantic_type\": \"\",\n        \"description\": \"\"\n      }\n    },\n    {\n      \"column\": \"Gender\",\n      \"properties\": {\n        \"dtype\": \"category\",\n        \"num_unique_values\": 2,\n        \"samples\": [\n          \"Male\",\n          \"Female\"\n        ],\n        \"semantic_type\": \"\",\n        \"description\": \"\"\n      }\n    },\n    {\n      \"column\": \"Company Type\",\n      \"properties\": {\n        \"dtype\": \"category\",\n        \"num_unique_values\": 2,\n        \"samples\": [\n          \"Product\",\n          \"Service\"\n        ],\n        \"semantic_type\": \"\",\n        \"description\": \"\"\n      }\n    },\n    {\n      \"column\": \"WFH Setup Available\",\n      \"properties\": {\n        \"dtype\": \"category\",\n        \"num_unique_values\": 2,\n        \"samples\": [\n          \"Yes\",\n          \"No\"\n        ],\n        \"semantic_type\": \"\",\n        \"description\": \"\"\n      }\n    },\n    {\n      \"column\": \"Designation\",\n      \"properties\": {\n        \"dtype\": \"number\",\n        \"std\": 1,\n        \"min\": 0,\n        \"max\": 5,\n        \"num_unique_values\": 6,\n        \"samples\": [\n          2,\n          1\n        ],\n        \"semantic_type\": \"\",\n        \"description\": \"\"\n      }\n    },\n    {\n      \"column\": \"Resource Allocation\",\n      \"properties\": {\n        \"dtype\": \"number\",\n        \"std\": 2.0448484108269387,\n        \"min\": 1.0,\n        \"max\": 10.0,\n        \"num_unique_values\": 10,\n        \"samples\": [\n          10.0,\n          2.0\n        ],\n        \"semantic_type\": \"\",\n        \"description\": \"\"\n      }\n    },\n    {\n      \"column\": \"Mental Fatigue Score\",\n      \"properties\": {\n        \"dtype\": \"number\",\n        \"std\": 1.9205468069740497,\n        \"min\": 0.0,\n        \"max\": 10.0,\n        \"num_unique_values\": 101,\n        \"samples\": [\n          9.6,\n          8.6\n        ],\n        \"semantic_type\": \"\",\n        \"description\": \"\"\n      }\n    },\n    {\n      \"column\": \"Burn Rate\",\n      \"properties\": {\n        \"dtype\": \"number\",\n        \"std\": 0.1978475722276363,\n        \"min\": 0.0,\n        \"max\": 1.0,\n        \"num_unique_values\": 101,\n        \"samples\": [\n          0.08,\n          0.4\n        ],\n        \"semantic_type\": \"\",\n        \"description\": \"\"\n      }\n    }\n  ]\n}"
+            }
+          },
+          "metadata": {},
+          "execution_count": 7
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "data.info()"
+      ],
+      "metadata": {
+        "id": "q2VoALyhLPcb",
+        "outputId": "35f242a3-89f8-4402-fa6e-fc10d58928d6",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 0
+        }
+      },
+      "execution_count": 8,
+      "outputs": [
+        {
+          "metadata": {
+            "tags": null
+          },
+          "name": "stdout",
+          "output_type": "stream",
+          "text": [
+            "<class 'pandas.core.frame.DataFrame'>\n",
+            "Index: 18590 entries, 0 to 22749\n",
+            "Data columns (total 9 columns):\n",
+            " #   Column                Non-Null Count  Dtype         \n",
+            "---  ------                --------------  -----         \n",
+            " 0   Employee ID           18590 non-null  object        \n",
+            " 1   Date of Joining       18590 non-null  datetime64[ns]\n",
+            " 2   Gender                18590 non-null  object        \n",
+            " 3   Company Type          18590 non-null  object        \n",
+            " 4   WFH Setup Available   18590 non-null  object        \n",
+            " 5   Designation           18590 non-null  int64         \n",
+            " 6   Resource Allocation   18590 non-null  float64       \n",
+            " 7   Mental Fatigue Score  18590 non-null  float64       \n",
+            " 8   Burn Rate             18590 non-null  float64       \n",
+            "dtypes: datetime64[ns](1), float64(3), int64(1), object(4)\n",
+            "memory usage: 1.4+ MB\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "data.corr(numeric_only=True)['Burn Rate'][:-1]"
+      ],
+      "metadata": {
+        "id": "dGCF6hQHLlEx",
+        "outputId": "058e82a2-621e-4839-d0ee-76ae38d6e1f4",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 0
+        }
+      },
+      "execution_count": 9,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "Designation             0.736412\n",
+              "Resource Allocation     0.855005\n",
+              "Mental Fatigue Score    0.944389\n",
+              "Name: Burn Rate, dtype: float64"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 9
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "data.shape"
+      ],
+      "metadata": {
+        "id": "AxsntYjNLr9t",
+        "outputId": "8fb3e8c8-7d59-4cab-ccc0-a0f7119a0282",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 0
+        }
+      },
+      "execution_count": 10,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "(18590, 9)"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 10
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "data.dtypes"
+      ],
+      "metadata": {
+        "id": "lcpbx947Lw0_",
+        "outputId": "1af936c5-453b-4044-c972-0a51d4481966",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 0
+        }
+      },
+      "execution_count": 11,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "Employee ID                     object\n",
+              "Date of Joining         datetime64[ns]\n",
+              "Gender                          object\n",
+              "Company Type                    object\n",
+              "WFH Setup Available             object\n",
+              "Designation                      int64\n",
+              "Resource Allocation            float64\n",
+              "Mental Fatigue Score           float64\n",
+              "Burn Rate                      float64\n",
+              "dtype: object"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 11
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "data=data.drop('Date of Joining',axis=1)"
+      ],
+      "metadata": {
+        "id": "gy3ro_rUL3Ew"
+      },
+      "execution_count": 12,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "y = data['Burn Rate']\n",
+        "X = data.drop('Burn Rate', axis=1)"
+      ],
+      "metadata": {
+        "id": "RGKZLUgsL92L"
+      },
+      "execution_count": 13,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "data.dtypes"
+      ],
+      "metadata": {
+        "id": "upil3JN4MPLO",
+        "outputId": "fc24239e-3e0d-438b-9e78-baa964cdceba",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 0
+        }
+      },
+      "execution_count": 14,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "Employee ID              object\n",
+              "Gender                   object\n",
+              "Company Type             object\n",
+              "WFH Setup Available      object\n",
+              "Designation               int64\n",
+              "Resource Allocation     float64\n",
+              "Mental Fatigue Score    float64\n",
+              "Burn Rate               float64\n",
+              "dtype: object"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 14
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "data.tail()"
+      ],
+      "metadata": {
+        "id": "B7rIQbIRK6WW"
+      },
+      "execution_count": null,
+      "outputs": []
+    }
+  ]
+}
